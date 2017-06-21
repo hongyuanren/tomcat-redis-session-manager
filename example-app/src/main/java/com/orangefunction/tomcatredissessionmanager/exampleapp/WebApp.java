@@ -232,7 +232,7 @@ public class WebApp implements spark.servlet.SparkApplication {
            Boolean error = true;
            try {
              jedis = acquireConnection();
-             Set<String> keySet = jedis.keys("*");
+             Set<String> keySet = jedis.keys("session:*");
              error = false;
              return keySet.toArray(new String[keySet.size()]);
            } finally {
@@ -251,7 +251,7 @@ public class WebApp implements spark.servlet.SparkApplication {
            try {
              jedis = acquireConnection();
              jedis.flushDB();
-             Set<String> keySet = jedis.keys("*");
+             Set<String> keySet = jedis.keys("session:*");
              error = false;
              return keySet.toArray(new String[keySet.size()]);
            } finally {

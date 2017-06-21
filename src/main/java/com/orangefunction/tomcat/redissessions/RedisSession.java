@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
+import redis.clients.jedis.Jedis;
+
 
 public class RedisSession extends StandardSession {
 
@@ -115,6 +117,24 @@ public class RedisSession extends StandardSession {
   public void readObjectData(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
     super.readObjectData(in);
     this.setCreationTime(in.readLong());
+  }
+
+  @Override
+  public void access() {
+    if (getMaxInactiveInterval() > 0) {
+      Jedis jedis = null;
+      Boolean error = true;
+      try {
+        jedis = ((RedisSessionManager) manager).acquireConnection();
+        String sessId = "session:" + getId();
+        jedis.expire(sessId.getBytes(), getMaxInactiveInterval());
+        error = false;
+	  } finally {
+		if (jedis != null) {
+			((RedisSessionManager) manager).returnConnection(jedis, error);
+		}
+      }
+	}
   }
 
 }
